@@ -1,19 +1,11 @@
-package com.vlater.taskmanager.model;
-
-import jakarta.persistence.*;
+package com.vlater.taskmanager.dto.response;
 
 import java.util.Date;
 
-@Entity
-@Table(name = "tasks")
-public class Task {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class TaskResponse {
+
     private int id;
-
-    @Column(nullable = false)
     private String title;
-
     private String description;
     private Date dueDate;
     private boolean completed;
@@ -42,19 +34,19 @@ public class Task {
         this.description = description;
     }
 
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
-    }
-
     public Date getDueDate() {
         return dueDate;
     }
 
     public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 }

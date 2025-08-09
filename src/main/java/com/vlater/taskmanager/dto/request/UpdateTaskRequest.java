@@ -1,30 +1,20 @@
-package com.vlater.taskmanager.model;
+package com.vlater.taskmanager.dto.request;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.util.Date;
 
-@Entity
-@Table(name = "tasks")
-public class Task {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class UpdateTaskRequest {
 
-    @Column(nullable = false)
+    @Size(max = 100)
     private String title;
 
+    @Size(max = 500)
     private String description;
+
     private Date dueDate;
     private boolean completed;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getTitle() {
         return title;
@@ -42,6 +32,14 @@ public class Task {
         this.description = description;
     }
 
+    public Date getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Date dueDate) {
+        this.dueDate = dueDate;
+    }
+
     public boolean isCompleted() {
         return completed;
     }
@@ -50,11 +48,4 @@ public class Task {
         this.completed = completed;
     }
 
-    public Date getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(Date dueDate) {
-        this.dueDate = dueDate;
-    }
 }
