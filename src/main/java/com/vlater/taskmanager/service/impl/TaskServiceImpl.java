@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -36,21 +37,34 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskResponse> getTasks() {
-        return List.of();
+        final List<TaskResponse> taskResponseList = new ArrayList<>();
+        final List<Task> tasks = taskRepository.findAll();
+        for(Task task : tasks) {
+            final TaskResponse taskResponse = modelMapper.map(task, TaskResponse.class);
+            taskResponseList.add(taskResponse);
+        }
+        return taskResponseList;
     }
 
     @Override
     public TaskResponse getTask(int id) {
-        return null;
+        final Task task = taskRepository.findTaskById(id);
+        return modelMapper.map(task, TaskResponse.class);
     }
 
     @Override
     public TaskResponse updateTask(int id, UpdateTaskRequest request) {
-        return null;
+        final Task task = taskRepository.findTaskById(id);
+        task.setCompleted(request.isCompleted());
+        task.setDescription(request.getDescription());
+        task.setTitle(request.getTitle());
+        task.setDueDate(request.getDueDate());
+        taskRepository.save(task);
+        return modelMapper.map(task, TaskResponse.class);
     }
 
     @Override
     public void deleteTask(int id) {
-
+        taskRepository.deleteById(id);
     }
 }
