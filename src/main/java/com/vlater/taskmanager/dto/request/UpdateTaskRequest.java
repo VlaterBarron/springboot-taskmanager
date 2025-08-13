@@ -1,18 +1,25 @@
 package com.vlater.taskmanager.dto.request;
 
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class UpdateTaskRequest {
 
-    @Size(max = 100)
+    @NotNull(message = "Title can't be null")
+    @NotBlank(message = "Title is required")
+    @Size(min = 3, max = 100, message = "Title must be 3-100 characters")
     private String title;
 
-    @Size(max = 500)
+    @Size(max = 500, message = "Description is longer than 500 characters")
     private String description;
 
-    private Date dueDate;
+    @FutureOrPresent(message = "Due Date must be in the future")
+    private LocalDate dueDate;
+
     private boolean completed;
 
     public String getTitle() {
@@ -31,11 +38,11 @@ public class UpdateTaskRequest {
         this.description = description;
     }
 
-    public Date getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 

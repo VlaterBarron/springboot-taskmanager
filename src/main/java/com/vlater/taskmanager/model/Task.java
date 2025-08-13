@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "tasks")
@@ -20,7 +20,7 @@ public class Task {
     private String title;
 
     private String description;
-    private Date dueDate;
+    private LocalDate dueDate;
     private boolean completed;
 
     public int getId() {
@@ -55,11 +55,11 @@ public class Task {
         this.completed = completed;
     }
 
-    public Date getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 }

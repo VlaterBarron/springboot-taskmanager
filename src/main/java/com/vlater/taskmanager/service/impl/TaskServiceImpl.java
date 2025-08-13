@@ -3,6 +3,7 @@ package com.vlater.taskmanager.service.impl;
 import com.vlater.taskmanager.dto.request.CreateTaskRequest;
 import com.vlater.taskmanager.dto.request.UpdateTaskRequest;
 import com.vlater.taskmanager.dto.response.TaskResponse;
+import com.vlater.taskmanager.exceptions.NoSuchTaskExistsException;
 import com.vlater.taskmanager.model.Task;
 import com.vlater.taskmanager.repository.TaskRepository;
 import com.vlater.taskmanager.service.TaskService;
@@ -48,23 +49,32 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponse getTask(int id) {
-        final Task task = taskRepository.findTaskById(id);
+        final Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new NoSuchTaskExistsException(id));
+
         return modelMapper.map(task, TaskResponse.class);
     }
 
     @Override
     public TaskResponse updateTask(int id, UpdateTaskRequest request) {
-        final Task task = taskRepository.findTaskById(id);
+
+        final Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new NoSuchTaskExistsException(id));
+
         task.setCompleted(request.isCompleted());
         task.setDescription(request.getDescription());
         task.setTitle(request.getTitle());
         task.setDueDate(request.getDueDate());
+
         taskRepository.save(task);
         return modelMapper.map(task, TaskResponse.class);
     }
 
     @Override
     public void deleteTask(int id) {
-        taskRepository.deleteById(id);
+        final Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new NoSuchTaskExistsException(id));
+
+        taskRepository.deleteById(task.getId());
     }
 }
