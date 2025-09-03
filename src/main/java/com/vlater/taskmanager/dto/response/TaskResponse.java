@@ -1,13 +1,13 @@
 package com.vlater.taskmanager.dto.response;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class TaskResponse {
 
     private int id;
     private String title;
     private String description;
-    private Date dueDate;
+    private LocalDate dueDate;
     private boolean completed;
 
     public int getId() {
@@ -34,11 +34,11 @@ public class TaskResponse {
         this.description = description;
     }
 
-    public Date getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 

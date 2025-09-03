@@ -1,7 +1,9 @@
 package com.vlater.taskmanager.service.impl;
 
 import com.vlater.taskmanager.dto.request.CreateTaskRequest;
+import com.vlater.taskmanager.dto.request.Filters;
 import com.vlater.taskmanager.dto.request.UpdateTaskRequest;
+import com.vlater.taskmanager.dto.response.PagedResponse;
 import com.vlater.taskmanager.dto.response.TaskResponse;
 import com.vlater.taskmanager.exceptions.NoSuchTaskExistsException;
 import com.vlater.taskmanager.model.Task;
@@ -9,11 +11,13 @@ import com.vlater.taskmanager.repository.TaskRepository;
 import com.vlater.taskmanager.service.TaskService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -37,14 +41,21 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponse> getTasks() {
-        final List<TaskResponse> taskResponseList = new ArrayList<>();
-        final List<Task> tasks = taskRepository.findAll();
-        for(Task task : tasks) {
-            final TaskResponse taskResponse = modelMapper.map(task, TaskResponse.class);
-            taskResponseList.add(taskResponse);
-        }
-        return taskResponseList;
+    public PagedResponse<TaskResponse> getTasks(Pageable pageable, Filters filters) {
+        final Page<Task> taskPage = taskRepository.findWithFilters(
+                filters.getTitle(),
+                filters.isCompleted(),
+                filters.getStartDate(),
+                filters.getEndDate(),
+                pageable
+        );
+
+        final List<TaskResponse> content = taskPage.getContent()
+                .stream()
+                .map(task -> modelMapper.map(task, TaskResponse.class))
+                .collect(Collectors.toList());
+
+        return PagedResponse.createPagedResponse(content, taskPage);
     }
 
     @Override
