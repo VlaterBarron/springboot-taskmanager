@@ -8,7 +8,6 @@ import com.vlater.taskmanager.dto.response.TaskResponse;
 import com.vlater.taskmanager.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -41,13 +39,23 @@ public class TaskController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate endDate
             ) {
+
         final Sort sort = direction.equalsIgnoreCase("asc")
                 ? Sort.by(Sort.Direction.ASC, orderBy)
                 : Sort.by(Sort.Direction.DESC, orderBy);
         final Pageable pageable = PageRequest.of(page, size, sort);
         final Filters filters = new Filters(title, startDate, endDate, completed);
 
-        return ResponseEntity.ok(taskService.getTasks(pageable, filters));
+        final PagedResponse<TaskResponse> tasks = taskService.getTasks(pageable, filters);
+        if(tasks == null){
+            return new ResponseEntity<>(new PagedResponse<>(), HttpStatus.NOT_FOUND);
+
+        } else if(tasks.getTotalElements() == 0) {
+
+            return new ResponseEntity<>(tasks, HttpStatus.NO_CONTENT);
+        }
+
+        return new ResponseEntity<>(tasks, HttpStatus.OK );
     }
 
     @GetMapping("/{id}")

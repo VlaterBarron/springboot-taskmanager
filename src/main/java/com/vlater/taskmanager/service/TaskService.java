@@ -8,7 +8,6 @@ import com.vlater.taskmanager.dto.response.TaskResponse;
 import com.vlater.taskmanager.exceptions.NoSuchTaskExistsException;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 
 public interface TaskService {
 

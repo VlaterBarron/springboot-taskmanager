@@ -1,6 +1,5 @@
 package com.vlater.taskmanager.repository;
 
-import com.vlater.taskmanager.dto.request.Filters;
 import com.vlater.taskmanager.model.Task;
 import com.vlater.taskmanager.repository.constants.Constants;
 import org.springframework.data.domain.Page;
