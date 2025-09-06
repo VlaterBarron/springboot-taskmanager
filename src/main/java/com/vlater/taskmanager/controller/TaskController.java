@@ -47,15 +47,9 @@ public class TaskController {
         final Filters filters = new Filters(title, startDate, endDate, completed);
 
         final PagedResponse<TaskResponse> tasks = taskService.getTasks(pageable, filters);
-        if(tasks == null){
-            return new ResponseEntity<>(new PagedResponse<>(), HttpStatus.NOT_FOUND);
-
-        } else if(tasks.getTotalElements() == 0) {
-
-            return new ResponseEntity<>(tasks, HttpStatus.NO_CONTENT);
-        }
-
-        return new ResponseEntity<>(tasks, HttpStatus.OK );
+        return tasks.getTotalElements() == 0
+                ? new ResponseEntity<>(tasks, HttpStatus.NO_CONTENT)
+                : new ResponseEntity<>(tasks, HttpStatus.OK );
     }
 
     @GetMapping("/{id}")

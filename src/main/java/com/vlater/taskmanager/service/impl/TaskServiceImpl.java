@@ -42,6 +42,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public PagedResponse<TaskResponse> getTasks(Pageable pageable, Filters filters) {
+
+
         final Page<Task> taskPage = taskRepository.findWithFilters(
                 filters.getTitle(),
                 filters.isCompleted(),
@@ -49,6 +51,7 @@ public class TaskServiceImpl implements TaskService {
                 filters.getEndDate(),
                 pageable
         );
+
 
         final List<TaskResponse> content = taskPage.getContent()
                 .stream()
