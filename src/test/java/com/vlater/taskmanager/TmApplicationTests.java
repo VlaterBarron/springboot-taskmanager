@@ -1,8 +1,11 @@
 package com.vlater.taskmanager;
 
+import com.vlater.taskmanager.dto.request.CreateTaskRequest;
 import com.vlater.taskmanager.dto.request.Filters;
+import com.vlater.taskmanager.dto.request.UpdateTaskRequest;
 import com.vlater.taskmanager.dto.response.PagedResponse;
 import com.vlater.taskmanager.dto.response.TaskResponse;
+import com.vlater.taskmanager.exceptions.NoSuchTaskExistsException;
 import com.vlater.taskmanager.model.Task;
 import com.vlater.taskmanager.repository.TaskRepository;
 import com.vlater.taskmanager.service.impl.TaskServiceImpl;
@@ -20,6 +23,7 @@ import org.springframework.data.domain.*;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class TmApplicationTests {
@@ -111,6 +115,190 @@ class TmApplicationTests {
         Assertions.assertNotNull(res.getList());
         Assertions.assertEquals(2, res.getList().size());
         Mockito.verify(taskRepository).findWithFilters(null, null, null, null, pageable);
+    }
+
+    @Test
+    void createTask(){
+       final CreateTaskRequest  request = new CreateTaskRequest();
+       request.setTitle("Task 1");
+       request.setDescription("Task Description 1");
+       request.setDueDate(LocalDate.now());
+
+       final Task task = new Task();
+       task.setTitle("Task 1");
+       task.setDescription("Task Description 1");
+       task.setDueDate(LocalDate.now());
+       task.setCompleted(false);
+
+       final TaskResponse taskResponse = new TaskResponse();
+       taskResponse.setId(1);
+       taskResponse.setTitle("Task 1");
+       taskResponse.setDescription("Task Description 1");
+       taskResponse.setDueDate(LocalDate.of(2025, 9, 12));
+
+       Mockito.when(taskRepository.save(Mockito.any(Task.class))).thenReturn(task);
+       Mockito.when(modelMapper.map(request, Task.class)).thenReturn(task);
+        Mockito.when(modelMapper.map(task, TaskResponse.class)).thenReturn(taskResponse);
+
+       final TaskResponse response = taskService.createTask(request);
+       Assertions.assertNotNull(response);
+       Assertions.assertEquals(request.getTitle(), response.getTitle());
+       Assertions.assertEquals(request.getDescription(), response.getDescription());
+    }
+
+    @Test
+    void getTaskById(){
+
+        final Task task = new Task();
+        task.setId(1);
+        task.setTitle("Task 1");
+
+        final TaskResponse taskResponse = new TaskResponse();
+        taskResponse.setId(1);
+        taskResponse.setTitle("Task 1");
+
+        Mockito.when(taskRepository.findById(Mockito.anyInt())).thenReturn(Optional.of(task));
+        Mockito.when(modelMapper.map(task, TaskResponse.class)).thenReturn(taskResponse);
+
+        final TaskResponse response = taskService.getTask(1);
+
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(taskResponse.getId(), response.getId());
+        Assertions.assertEquals(taskResponse.getTitle(), response.getTitle());
+
+    }
+
+    @Test
+    void getTaskByIdWrongId(){
+
+        Mockito.when(taskRepository.findById(Mockito.anyInt())).thenThrow(new NoSuchTaskExistsException(2));
+
+        final TaskResponse response = taskService.getTask(2);
+
+        Assertions.assertNull(response);
+
+    }
+
+    @Test
+    void getTaskByIdOptionalNotFound(){
+
+        Mockito.when(taskRepository.findById(Mockito.anyInt())).thenReturn(Optional.empty());
+
+        final TaskResponse response = taskService.getTask(2);
+
+        Assertions.assertNull(response);
+
+    }
+
+    @Test
+    void updateTask(){
+       final UpdateTaskRequest request = new UpdateTaskRequest();
+       request.setTitle("Task 2");
+       request.setDescription("Task Description 2");
+       request.setDueDate(LocalDate.now());
+       request.setCompleted(true);
+
+       final Task task = new Task();
+       task.setTitle("Task 1");
+       task.setDescription("Task Description 1");
+       task.setDueDate(LocalDate.now());
+       task.setCompleted(false);
+
+        final TaskResponse taskRes = new TaskResponse();
+        taskRes.setTitle("Task 2");
+        taskRes.setDescription("Task Description 2");
+        taskRes.setDueDate(LocalDate.now());
+        taskRes.setCompleted(true);
+
+        Mockito.when(taskRepository.findById(Mockito.anyInt())).thenReturn(Optional.of(task));
+        Mockito.when(modelMapper.map(task, TaskResponse.class)).thenReturn(taskRes);
+
+        final TaskResponse response = taskService.updateTask(1, request);
+
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(task.getId(), response.getId());
+        Assertions.assertEquals(request.getTitle(), response.getTitle());
+
+    }
+
+    @Test
+    void updateTaskIsEmpty(){
+        final UpdateTaskRequest request = new UpdateTaskRequest();
+        request.setTitle("Task 2");
+        request.setDescription("Task Description 2");
+        request.setDueDate(LocalDate.now());
+        request.setCompleted(true);
+
+        Mockito.when(taskRepository.findById(Mockito.anyInt())).thenReturn(Optional.empty());
+
+        final TaskResponse response = taskService.updateTask(1, request);
+
+        Assertions.assertNull(response);
+
+    }
+
+    @Test
+    void updateTaskException(){
+        final UpdateTaskRequest request = new UpdateTaskRequest();
+        request.setTitle("Task 2");
+        request.setDescription("Task Description 2");
+        request.setDueDate(LocalDate.now());
+        request.setCompleted(true);
+
+        Mockito.when(taskRepository.findById(Mockito.anyInt())).thenThrow(new NoSuchTaskExistsException(1));
+
+        final TaskResponse response = taskService.updateTask(1, request);
+
+        Assertions.assertNull(response);
+
+    }
+
+    @Test
+    void deleteTask(){
+
+        final Task task = new Task();
+        task.setTitle("Task 1");
+        task.setDescription("Task Description 1");
+        task.setDueDate(LocalDate.now());
+        task.setCompleted(false);
+
+
+        Mockito.when(taskRepository.findById(Mockito.anyInt())).thenReturn(Optional.of(task));
+
+        taskService.deleteTask(1);
+
+    }
+
+    @Test
+    void deleteTaskNotFound(){
+
+        final Task task = new Task();
+        task.setTitle("Task 1");
+        task.setDescription("Task Description 1");
+        task.setDueDate(LocalDate.now());
+        task.setCompleted(false);
+
+
+        Mockito.when(taskRepository.findById(Mockito.anyInt())).thenReturn(Optional.empty());
+
+        taskService.deleteTask(1);
+
+    }
+
+    @Test
+    void deleteTaskException(){
+
+        final Task task = new Task();
+        task.setTitle("Task 1");
+        task.setDescription("Task Description 1");
+        task.setDueDate(LocalDate.now());
+        task.setCompleted(false);
+
+
+        Mockito.when(taskRepository.findById(Mockito.anyInt())).thenThrow(new NoSuchTaskExistsException(task.getId()));
+
+        taskService.deleteTask(1);
+
     }
 
 }

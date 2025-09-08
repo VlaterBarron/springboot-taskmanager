@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,17 +64,33 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponse getTask(int id) {
-        final Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new NoSuchTaskExistsException(id));
 
-        return modelMapper.map(task, TaskResponse.class);
+        try {
+            final Optional<Task> task = taskRepository.findById(id);
+            if (task.isPresent()) {
+                return modelMapper.map(task.get(), TaskResponse.class);
+            }
+        } catch (NoSuchTaskExistsException e) {
+            return null;
+        }
+
+        return null;
     }
 
     @Override
     public TaskResponse updateTask(int id, UpdateTaskRequest request) {
+        Task task ;
+        try {
+            final Optional<Task> optionalTask = taskRepository.findById(id);
+            if(optionalTask.isEmpty()) {
+                return null;
+            }
 
-        final Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new NoSuchTaskExistsException(id));
+            task = optionalTask.get();
+
+        } catch (NoSuchTaskExistsException e) {
+            return null;
+        }
 
         task.setCompleted(request.isCompleted());
         task.setDescription(request.getDescription());
@@ -86,9 +103,16 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void deleteTask(int id) {
-        final Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new NoSuchTaskExistsException(id));
+        try {
+            final Optional<Task> optionalTask = taskRepository.findById(id);
+            if(optionalTask.isEmpty()) {
+                return;
+            }
 
-        taskRepository.deleteById(task.getId());
+            taskRepository.deleteById(optionalTask.get().getId());
+        } catch (Exception e) {
+            return;
+        }
+
     }
 }
